@@ -1,0 +1,21 @@
+{
+  "name": "testsite",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "async": "^2.5.0",
+    "azure-mobile-apps": "^2.0.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.3",
+    "debug": "~2.2.0",
+    "express": "^4.16.3",
+    "jade": "~1.11.0",
+    "multer": "^1.3.0",
+    "randomstring": "^1.1.5",
+    "restler": "^3.4.0",
+    "winston": "^2.1.1"
+  }
+}
