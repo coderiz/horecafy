@@ -435,7 +435,7 @@ module.exports = function () {
   router.get('/:id/availability', function (req, res, next) {
 
     var query = {
-      sql: 'GetaAailabilityByCustomerId @customerId',
+      sql: 'GetAailabilityByCustomerId @customerId',
       parameters: [
         { name: 'customerId', value: req.params.id }
       ]

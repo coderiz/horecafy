@@ -23,6 +23,7 @@ var wholesalerListApi = require('./api/wholesaler-list');
 var statsApi = require('./api/stats');
 var orderApi = require('./api/order');
 var businessvisitApi = require('./api/businessvisit');
+var passwordResetApi = require('./api/password-reset');
 
 var app = express();
 var mobile = azureMobileApps({
@@ -62,6 +63,7 @@ app.use(`/api/${apiVersion}/wholesaler-list`, wholesalerListApi());
 app.use(`/api/${apiVersion}/stats`, statsApi());
 app.use(`/api/${apiVersion}/order`, orderApi());
 app.use(`/api/${apiVersion}/businessvisit`, businessvisitApi());
+app.use(`/api/${apiVersion}/password-reset`, passwordResetApi());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
