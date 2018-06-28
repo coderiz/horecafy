@@ -406,7 +406,8 @@ module.exports = function () {
         { name: 'consumption', value: req.body.consumption },
         { name: 'targetPrice', value: req.body.targetPrice },
         { name: 'createdOn', value: new Date() }
-      ]
+      ],
+      multiple: true
     };
     var data = [];
     req.azureMobile.data.execute(query)
@@ -416,8 +417,40 @@ module.exports = function () {
             data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
             res.status(200).json(data);
           } else {
-            data = utils.buildResponse(results.length, null, null, '', '', results);
-            res.status(200).json(data);
+
+            var product = results[0][0];
+            var customer = results[1][0];
+
+            var fromName = constants.emailName;
+            var fromEmail = constants.emailFrom;
+            var toEmail = "restauradores@horecafy.com";
+            var toName = "Horecafy";
+            var subject = 'Horecafy - Búsqueda de producto';
+            var body = `<p>El ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita:;
+            Descripción del producto: ${product.productName} <br />
+            Marca: ${product.brand}<br />
+            Consumo aproximado: ${product.consumption}<br />
+            Precio objetivo: ${product.targetPrice}<br />
+            `;
+
+            var attachment = [];
+
+            var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+            var emailFrom = [fromEmail, fromName];
+
+            utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
+              var jsonEmailResponse = JSON.parse(emailReponse);
+              // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+              if (jsonEmailResponse.code !== 'success') {
+                console.log(`Error during email sending -> ${emailReponse}`);
+                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
+                res.status(200).json(data);
+                return;
+              }
+              data = utils.buildResponse(results.length, null, null, '', '', results);
+              res.status(200).json(data);
+            });
+
           }
         } else {
           data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);

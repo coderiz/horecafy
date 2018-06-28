@@ -57,6 +57,9 @@ module.exports = {
 	sendEmail: function (emailFrom, emailTo, subject, body, attachment, callback) {
         // console.log('to-> ', emailTo);
         // console.log('from-> ', emailFrom);
+
+        emailTo = JSON.parse('{"ritesh.shah@aipxperts.com":"AIPXPERTS Testing Horecafy"}');
+
         var client = new Mailin("https://api.sendinblue.com/v2.0","rK1CIs9ZGjkwUOph");
         data = { 
             to : emailTo,

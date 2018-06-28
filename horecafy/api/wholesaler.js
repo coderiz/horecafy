@@ -201,7 +201,7 @@ module.exports = function () {
   // post wholesaler
   router.post('/', function(req, res, next) {
 
-    //console.log('req', req.body);
+    console.log('req', req.body);
     if (!utils.validateParam({ 'name': 'VAT', 'value': req.body.VAT }, res)) return;
     if (!utils.validateParam({ 'name': 'email', 'value': req.body.email }, res)) return;
     if (!utils.validateParam({ 'name': 'password', 'value': req.body.password }, res)) return;

@@ -31,12 +31,14 @@ module.exports = function () {
                     } else {
                         // const data = utils.buildResponse(results.length, null, null, '', '', results);
                         var customer = results[0];
+                        var resetToken = randomstring.generate({ length: 6, charset: 'alphabetic' });
+
                         var query = {
                             sql: 'CreatePasswordResetRequest @userId, @typeUser, @token, @createdOn',
                             parameters: [
                                 { name: 'userId', value: customer.hiddenId },
                                 { name: 'typeUser', value: req.body.typeUser },
-                                { name: 'token', value: randomstring.generate({length: 6,charset: 'alphabetic'}) },
+                                { name: 'token', value: resetToken },
                                 { name: 'createdOn', value: new Date() }
                             ]
                         };
@@ -49,10 +51,12 @@ module.exports = function () {
                                         data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
                                         res.status(200).json(data);
                                     } else {
+
+                                        var user = results[0];
                                         var fromName = constants.emailName;
                                         var fromEmail = constants.emailFrom;
-                                        var toEmail = "info@aipxperts.com";
-                                        var toName = "testing";
+                                        var toEmail = user.email;
+                                        var toName = user.name;
                                         var subject = 'Horecafy - Registro de distribuidor';
                                         var body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
 
@@ -73,7 +77,7 @@ module.exports = function () {
                                                 res.status(200).json(data);
                                                 return;
                                             }
-                                            data = utils.buildResponse(results.length, null, null, '', '', results);
+                                            data = utils.buildResponse(results.length, null, null, '', '', results[0]);
                                             res.status(200).json(data);
                                         });
                                     }
@@ -143,10 +147,12 @@ module.exports = function () {
                                         data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
                                         res.status(200).json(data);
                                     } else {
+
+                                        var user = results[0];
                                         var fromName = constants.emailName;
                                         var fromEmail = constants.emailFrom;
-                                        var toEmail = "info@aipxperts.com";
-                                        var toName = "testing";
+                                        var toEmail = user.email;
+                                        var toName = user.name;
                                         var subject = 'Horecafy - Registro de distribuidor';
                                         var body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
 
@@ -167,7 +173,7 @@ module.exports = function () {
                                                 res.status(200).json(data);
                                                 return;
                                             }
-                                            data = utils.buildResponse(results.length, null, null, '', '', results);
+                                            data = utils.buildResponse(results.length, null, null, '', '', results[0]);
                                             res.status(200).json(data);
                                         });
                                     }
