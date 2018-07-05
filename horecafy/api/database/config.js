@@ -4,8 +4,8 @@ module.exports = {
     },
     data: {
         provider: 'mssql',
-        server: '192.168.1.4', // horecafy.database.windows.net
-        database: 'horecafydb',
+        server: 'demo.aipxperts.com', // horecafy.database.windows.net
+        database: 'horecafy_db',
         user: 'root',
         password: 'root'
     },

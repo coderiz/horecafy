@@ -29,7 +29,7 @@ module.exports = function () {
                         const data = utils.buildResponse(0, null, null, results.errorCode, '', []);
                         res.status(200).json(data);
                     } else {
-                        // const data = utils.buildResponse(results.length, null, null, '', '', results);
+                        
                         var customer = results[0];
                         var resetToken = randomstring.generate({ length: 6, charset: 'alphabetic' });
 
@@ -40,7 +40,8 @@ module.exports = function () {
                                 { name: 'typeUser', value: req.body.typeUser },
                                 { name: 'token', value: resetToken },
                                 { name: 'createdOn', value: new Date() }
-                            ]
+                            ],
+                            multiple: true
                         };
 
                         var data = [];
@@ -52,7 +53,7 @@ module.exports = function () {
                                         res.status(200).json(data);
                                     } else {
 
-                                        var user = results[0];
+                                        var user = results[1][0];
                                         var fromName = constants.emailName;
                                         var fromEmail = constants.emailFrom;
                                         var toEmail = user.email;
@@ -173,7 +174,7 @@ module.exports = function () {
                                                 res.status(200).json(data);
                                                 return;
                                             }
-                                            data = utils.buildResponse(results.length, null, null, '', '', results[0]);
+                                            data = utils.buildResponse(results.length, null, null, '', '', results);
                                             res.status(200).json(data);
                                         });
                                     }

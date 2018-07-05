@@ -60,7 +60,7 @@ module.exports = {
 
         emailTo = JSON.parse('{"ritesh.shah@aipxperts.com":"AIPXPERTS Testing Horecafy"}');
 
-        
+        var client = new Mailin("https://api.sendinblue.com/v2.0","rK1CIs9ZGjkwUOph");
         data = { 
             to : emailTo,
             from : emailFrom,

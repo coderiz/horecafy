@@ -1,10 +1,12 @@
 var express = require('express');
 var utils = require('./utils');
 var constants = require('./constants');
+var moment = require('moment');
 
 module.exports = function() {
 
     var router = express.Router();
+    moment.locale('es');
 
     // post order
     router.post('/', function(req, res, next) {
@@ -51,7 +53,7 @@ module.exports = function() {
                         var toEmail = wholesaler.email;
                         var toName = wholesaler.name;
                         var subject = 'Horecafy - Pedido a entregar';
-                        var body = `<p>El ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita que le entregue el dia x a la hora ${order.deliveryDate}:`;
+                        var body = `<p>El ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita que le entregue el dia x a la hora ${moment(order.deliveryDate).format('MMM Do YYYY')}:`;
 
                         body = body + `<p>`;
                         orderProducts.forEach(orderProduct => {
@@ -128,7 +130,7 @@ module.exports = function() {
                         var toName = customer.name;
 
                         var subject = 'Horecafy - Pedido a entregar';
-                        var body = `<p>El distribuidor ${wholesaler.contactName} ha confirmado la entrega al ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita que le entregue el dia x a la hora ${order.deliveryDate} de los siguientes productos:`;
+                        var body = `<p>El distribuidor ${wholesaler.contactName} ha confirmado la entrega al ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita que le entregue el dia x a la hora ${moment(order.deliveryDate).format('MMM Do YYYY')} de los siguientes productos:`;
 
                         body = body + `<p>`;
                         orderProducts.forEach(orderProduct => {
@@ -145,7 +147,7 @@ module.exports = function() {
                         var emailFrom = [fromEmail, fromName];
 
                         utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
-                            return res.redirect("http://horecafy.com/thank-you/");
+                            return res.redirect("http://horecafy.com/gracias/");
                         });
                     }
                 } else {

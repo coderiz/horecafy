@@ -447,7 +447,7 @@ module.exports = function () {
                 res.status(200).json(data);
                 return;
               }
-              data = utils.buildResponse(results.length, null, null, '', '', results);
+              data = utils.buildResponse(results.length, null, null, '', '', results[0]);
               res.status(200).json(data);
             });
 
