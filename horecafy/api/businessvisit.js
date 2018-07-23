@@ -24,7 +24,8 @@ module.exports = function () {
             const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
             res.status(200).json(data);
           } else {
-            const data = utils.buildResponse(results.length, null, null, '', '', results);
+            let dataFromDB = JSON.parse(results[0]["notifications"]);
+            const data = utils.buildResponse(results.length, null, null, '', '', dataFromDB);
             res.status(200).json(data);
           }
         } else {
@@ -84,6 +85,39 @@ module.exports = function () {
 
     var query = {
       sql: 'AcceptBusinessVisit @id',
+      parameters: [
+        { name: 'id', value: req.params.id }
+      ]
+    };
+
+    var data = [];
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            data = utils.buildResponse(results.length, null, null, '', '', results[0]);
+            res.status(200).json(data);
+          }
+        } else {
+          data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+
+  });
+
+  // Reject business visit
+  router.get('/reject/:id', function (req, res, next) {
+
+    var query = {
+      sql: 'RejectBusinessVisit @id',
       parameters: [
         { name: 'id', value: req.params.id }
       ]

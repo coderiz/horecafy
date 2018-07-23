@@ -52,21 +52,15 @@ module.exports = function() {
                         var fromEmail = constants.emailFrom;
                         var toEmail = wholesaler.email;
                         var toName = wholesaler.name;
-                        var subject = 'Horecafy - Pedido a entregar';
-                        var body = `<p>El ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita que le entregue el dia x a la hora ${moment(order.deliveryDate).format('MMM Do YYYY')}:`;
-
-                        body = body + `<p>`;
-                        orderProducts.forEach(orderProduct => {
-                            body = body + `${orderProduct.product} ${orderProduct.quantity} <br />`;
-                        });
-                        body = body + `</p>`;
-
-                        body = body + `
-                        <p><a href="${confirmURL}">Confirmar pedido</a></p>
-
+                        var subject = 'Pedido a entregar';
                         
-                        <p>Por favor confirma en este enlace que vas a entregar el pedido correctamente. Cualquier duda puedes contactar con el restaurador directamente.
-                            </p>`;
+                        var body = `<p>El ${customer.contactName} ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} a la hora ${order.deliveryTime}  los siguientes productos:</p>`;
+                        body = body + `<ul>`;
+                        orderProducts.forEach(orderProduct => {
+                            body = `<li>` + body + `${orderProduct.product} / ${orderProduct.quantity} </li>`;
+                        });
+                        body = body + `</ul>`;                        
+                        body = body + `<p>Por favor confirma en este enlace que vas a entregar el pedido correctamente <a href="${confirmURL}">${confirmURL}</a>.</p>`;
 
                         var attachment = [];
 
@@ -129,18 +123,19 @@ module.exports = function() {
                         var toEmail = customer.email;
                         var toName = customer.name;
 
-                        var subject = 'Horecafy - Pedido a entregar';
-                        var body = `<p>El distribuidor ${wholesaler.contactName} ha confirmado la entrega al ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita que le entregue el dia x a la hora ${moment(order.deliveryDate).format('MMM Do YYYY')} de los siguientes productos:`;
+                        var subject = 'Confirmación envio pedido';
+                        var body = `El distribuidor ${wholesaler.contactName} ha confirmado la entrega a el ${customer.contactName} ${customer.name} el día ${moment(order.deliveryDate).format('MMM Do YYYY')} del siguiente producto:`;
 
-                        body = body + `<p>`;
+                        body = body + `<ul>`;
                         orderProducts.forEach(orderProduct => {
-                            body = body + `${orderProduct.product} ${orderProduct.quantity} <br />`;
+                            body = `<li>` + body + `${orderProduct.product} ${orderProduct.quantity} </li>`;
                         });
-                        body = body + `</p>`;
+                        body = body + `</ul>`;
 
                         body = body + `
                         <p>Ante cualquier duda puedes contactar directamente con el distribuidor.</p>
-                        <p>Gracias.</p>`;
+                        <p>Un saludo, equipo Horecafy.</p>`;
+
                         var attachment = [];
 
                         var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
@@ -175,7 +170,8 @@ module.exports = function() {
                 { name: 'email', value: req.body.email },
                 { name: 'phone', value: req.body.phone },
                 { name: 'contact', value: req.body.contact }
-            ]
+            ],
+            multiple: true
         };
 
         var data = [];
@@ -186,16 +182,20 @@ module.exports = function() {
                         data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
                         res.status(200).json(data);
                     } else {
+
+                        var customer = results[1][0];
+
                         var fromName = constants.emailName;
                         var fromEmail = constants.emailFrom;
                         var toEmail = req.body.email;
                         var toName = req.body.name;
-                        var subject = 'Horecafy - Registro de distribuidor';
-                        var body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
+                        var subject = `${customer.name} te quiere invitar a Horecafy.`;
 
-          <p>Si tienes que incorporar muchas familias a tus listas ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo una a una en la app.</p> 
-          
-          <p>Gracias por usar Horecafy</p>`;
+                        var body = `<p>¡Hola!</p> 
+                                    <p>El ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} te ha enviado una invitación para poder enviarte pedidos a través de  Horecafy.</p> 
+                                    <p>Visita nuestra web y ,únete ya a nuestra familia! Esperamos recibir noticias tuyas pronto.</p> 
+                                    <p>Un saludo, equipo Horecafy</p>`;
+
                         var attachment = [];
 
                         var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
@@ -210,7 +210,7 @@ module.exports = function() {
                                 res.status(200).json(data);
                                 return;
                             }
-                            data = utils.buildResponse(results.length, null, null, '', '', results);
+                            data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
                             res.status(200).json(data);
                         });
                     }

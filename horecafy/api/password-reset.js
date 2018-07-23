@@ -58,12 +58,14 @@ module.exports = function () {
                                         var fromEmail = constants.emailFrom;
                                         var toEmail = user.email;
                                         var toName = user.name;
-                                        var subject = 'Horecafy - Registro de distribuidor';
-                                        var body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
-
-                                                    <p>Si tienes que incorporar muchas familias a tus listas ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo una a una en la app.</p> 
+                                        var subject = 'Recuperar contraseña Horecafy';
+                                        var body = `Hola ${user.name}, 
+                                        
+                                                    <p>por favor use este código para restaurar su contraseña de Horecafy: ${resetToken}.</p> 
                                                     
-                                                    <p>Gracias por usar Horecafy</p>`;
+                                                    <p>Si lo has olvidado el mail que utilizas es: ${user.email}.</p> 
+                                                    
+                                                    <p>Muchas gracias, equipo Horecafy</p>`;
                                         var attachment = [];
 
                                         var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');

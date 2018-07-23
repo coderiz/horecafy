@@ -32,12 +32,20 @@ module.exports = function () {
             res.status(200).json(data);
           } else {
             // console.log(results[1][0]);
+
+            var customer = results[1][0];
+
             var fromName = constants.emailName;
             var fromEmail = constants.emailFrom;
             var toEmail = "restauradores@horecafy.com";
             var toName = "Horecafy";
-            var subject = 'Horecafy - Lista creada por restaurador';
-            var body = `<p>Hola, gracias por crear una lista con las familias de productos que consumes. Si compartes la lista con los distribuidores podrás recibir ofertas que podrás aprovechar.</p><p>Gracias por usar Horecafy</p>`;
+            var subject = 'Lista personalizada';
+            
+            var body = `<p>¡Hola!</p> 
+                        <p>El ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} necesita:</p>
+                        <p>${req.body.demandText}</p>`;
+
+
             var attachment = [];
 
             var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');

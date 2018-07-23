@@ -249,12 +249,10 @@ module.exports = function () {
           var fromEmail = constants.emailFrom;
           var toEmail = req.body.email;
           var toName = req.body.name;
-          var subject = 'Horecafy - Registro de distribuidor';
-          var body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
-
-          <p>Si tienes que incorporar muchas familias a tus listas ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo una a una en la app.</p> 
-          
-          <p>Gracias por usar Horecafy</p>`;
+          var subject = 'Bienvenido a Horecafy';
+          var body = `<p>¡Enhorabuena!</p>
+                      <p>Ahora formas parte de la familia Horecafy. Gracias por confiar en nosotros.</p>
+                      <p>Un saludo, equipo Horecafy.</p>`;
           var attachment = [];
   
           var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');

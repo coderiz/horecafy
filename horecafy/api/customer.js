@@ -290,10 +290,10 @@ module.exports = function () {
             var fromEmail = constants.emailFrom;
             var toEmail = req.body.email;
             var toName = req.body.name;
-            var subject = 'Horecafy - Registro de restaurador';
-            var body = `<p>Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que compras para que podamos enviar tus necesidades a los distribuidores que comercializan estos productos y así recibir ofertas.</p>
-                      <p>Si tienes que incorporar muchas familias a tus listas ponte en contacto con nosotros en restauradores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo una a una en la app.</p>
-                      <p>Gracias por usar Horecafy</p>`;
+            var subject = 'Bienvenido a Horecafy';
+            var body = `<p>¡Enhorabuena!</p>
+                      <p>Ahora formas parte de la familia Horecafy. Gracias por confiar en nosotros.</p>
+                      <p>Un saludo, equipo Horecafy.</p>`;
             var attachment = [];
 
             var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
@@ -425,13 +425,13 @@ module.exports = function () {
             var fromEmail = constants.emailFrom;
             var toEmail = "restauradores@horecafy.com";
             var toName = "Horecafy";
-            var subject = 'Horecafy - Búsqueda de producto';
-            var body = `<p>El ${customer.contactName} RESTAURANTE ${customer.name} en ${customer.address} necesita:;
-            Descripción del producto: ${product.productName} <br />
-            Marca: ${product.brand}<br />
-            Consumo aproximado: ${product.consumption}<br />
-            Precio objetivo: ${product.targetPrice}<br />
-            `;
+            var subject = "Búsqueda producto";
+            var body = `<p>El ${customer.contactName} con nombre EL MESON ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} necesita:</p> 
+            
+            <p>${product.productName}<br /> 
+            marca: ${product.brand}<br />
+            consumo aproximado: ${product.consumption}<br />
+            precio objetivo: ${product.targetPrice}.</p>`;
 
             var attachment = [];
 
@@ -447,7 +447,7 @@ module.exports = function () {
                 res.status(200).json(data);
                 return;
               }
-              data = utils.buildResponse(results.length, null, null, '', '', results[0]);
+              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
               res.status(200).json(data);
             });
 
@@ -480,12 +480,12 @@ module.exports = function () {
           const data = utils.buildResponse(results.length, null, null, '', '', results[0]);
           res.status(200).json(data);
         } else {
-          const data = utils.buildResponse(0, null, null, '', '', []);
+          const data = utils.buildResponse(0, null, null, '', '', {});
           res.status(200).json(data);
         }
       })
       .catch(function (err) {
-        const data = utils.buildResponse(0, null, null, '', '', []);
+        const data = utils.buildResponse(0, null, null, '', '', {});
         res.status(200).json(data);
       });
   });
