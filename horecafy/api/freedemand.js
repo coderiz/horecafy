@@ -41,10 +41,7 @@ module.exports = function () {
             var toName = "Horecafy";
             var subject = 'Lista personalizada';
             
-            var body = `<p>¡Hola!</p> 
-                        <p>El ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} necesita:</p>
-                        <p>${req.body.demandText}</p>`;
-
+            var body = `<p>Hola! El ${customer.contactName} ${customer.name} ${customer.address} ${customer.zipCode} ${customer.city} necesita: ${req.body.demandText}</p>`;
 
             var attachment = [];
 

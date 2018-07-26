@@ -24,8 +24,8 @@ module.exports = function() {
                 { name: 'createdOn', value: new Date() },
                 { name: 'wholesalerId', value: req.body.wholesalerId },
                 { name: 'deliveryDate', value: req.body.deliveryDate },
-                { name: 'deliveryTime', value: req.body.deliveryTime },
-                { name: 'comments', value: req.body.comments },
+                { name: 'deliveryTime', value: req.body.deliveryTime || "" },
+                { name: 'comments', value: req.body.comments || "" },
                 { name: 'wholeSalerConfirmation', value: 0 },
                 { name: 'products', value: req.body.products }
             ],
@@ -35,6 +35,7 @@ module.exports = function() {
         var data = [];
         req.azureMobile.data.execute(query)
             .then(function(results) {
+                console.log(results);
                 if (results.length > 0) {
                     if (results[0].errorCode) {
                         data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
@@ -54,7 +55,12 @@ module.exports = function() {
                         var toName = wholesaler.name;
                         var subject = 'Pedido a entregar';
                         
-                        var body = `<p>El ${customer.contactName} ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} a la hora ${order.deliveryTime}  los siguientes productos:</p>`;
+                        var deliveryTime = "";
+                        if (order.deliveryTime != "" && order.deliveryTime != "1970-01-01T00:00:00.000Z") {
+                            deliveryTime = `a la hora ${order.deliveryTime}`;
+                        }
+
+                        var body = `<p>El ${customer.contactName} ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} ${deliveryTime}  los siguientes productos:</p>`;
                         body = body + `<ul>`;
                         orderProducts.forEach(orderProduct => {
                             body = `<li>` + body + `${orderProduct.product} / ${orderProduct.quantity} </li>`;
@@ -195,6 +201,8 @@ module.exports = function() {
                                     <p>El ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} te ha enviado una invitación para poder enviarte pedidos a través de  Horecafy.</p> 
                                     <p>Visita nuestra web y ,únete ya a nuestra familia! Esperamos recibir noticias tuyas pronto.</p> 
                                     <p>Un saludo, equipo Horecafy</p>`;
+
+                                    console.log(body);
 
                         var attachment = [];
 

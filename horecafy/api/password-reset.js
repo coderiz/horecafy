@@ -24,6 +24,8 @@ module.exports = function () {
         req.azureMobile.data.execute(query)
             .then(function (results) {
 
+                console.log(results);
+
                 if (results.length > 0) {
                     if (results[0].errorCode) {
                         const data = utils.buildResponse(0, null, null, results.errorCode, '', []);
@@ -53,17 +55,16 @@ module.exports = function () {
                                         res.status(200).json(data);
                                     } else {
 
-                                        var user = results[1][0];
                                         var fromName = constants.emailName;
                                         var fromEmail = constants.emailFrom;
-                                        var toEmail = user.email;
-                                        var toName = user.name;
+                                        var toEmail = customer.email;
+                                        var toName = customer.name;
                                         var subject = 'Recuperar contraseña Horecafy';
-                                        var body = `Hola ${user.name}, 
+                                        var body = `Hola ${customer.name}, 
                                         
                                                     <p>por favor use este código para restaurar su contraseña de Horecafy: ${resetToken}.</p> 
                                                     
-                                                    <p>Si lo has olvidado el mail que utilizas es: ${user.email}.</p> 
+                                                    <p>Si lo has olvidado el mail que utilizas es: ${customer.email}.</p> 
                                                     
                                                     <p>Muchas gracias, equipo Horecafy</p>`;
                                         var attachment = [];

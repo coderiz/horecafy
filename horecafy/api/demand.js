@@ -8,38 +8,38 @@ module.exports = function () {
   var router = express.Router();
 
   // Get demands
-  router.get('/', function(req, res, next) {
+  router.get('/', function (req, res, next) {
 
     var query = {
-        sql: 'GetDemands',
-        parameters: []
+      sql: 'GetDemands',
+      parameters: []
     };
     req.azureMobile.data.execute(query)
-    .then(function (results) {
-      if (results.length > 0) {
-        if (results[0].errorCode) {
-          const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);            
-          res.status(200).json(data);
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            // console.log('JSON output -> ', JSON.parse(results[0]["Demands"]));
+            let dataFromDB = JSON.parse(results[0]["Demands"]);
+            const data = utils.buildResponse(dataFromDB.length, null, null, '', '', dataFromDB);
+            res.status(200).json(data);
+          }
         } else {
-          // console.log('JSON output -> ', JSON.parse(results[0]["Demands"]));
-          let dataFromDB = JSON.parse(results[0]["Demands"]);
-          const data = utils.buildResponse(dataFromDB.length, null, null, '', '', dataFromDB);
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
           res.status(200).json(data);
-        }        
-      } else {
-        const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
-      }
-    })
-    .catch(function (err) {
-      console.log(err);
-      const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
-      res.status(200).json(data);
-    });
+      });
   });
 
   // Get demand by id
-  router.get('/:id', function(req, res, next) {
+  router.get('/:id', function (req, res, next) {
     var query = {
       sql: 'GetDemand @id',
       parameters: [
@@ -47,138 +47,112 @@ module.exports = function () {
       ]
     };
     req.azureMobile.data.execute(query)
-    .then(function (results) {
-      if (results.length > 0) {
-        if (results[0].errorCode) {
-          const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);            
-          res.status(200).json(data);
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            const data = utils.buildResponse(results.length, null, null, '', '', results);
+            res.status(200).json(data);
+          }
         } else {
-          const data = utils.buildResponse(results.length, null, null, '', '', results);
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
           res.status(200).json(data);
-        }        
-      } else {
-        const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+        }
+      })
+      .catch(function (err) {
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
-      }
-    })
-    .catch(function (err) {
-      const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
-      res.status(200).json(data);
-    });
+      });
   });
 
   // share demand
-  router.get('/share/:id', function(req, res, next) {
+  router.get('/share/:id', function (req, res, next) {
 
     var query = {
       sql: 'ShareDemand @id',
       parameters: [
         { name: 'id', value: req.params.id }
       ],
-      multiple: true    
+      multiple: true
     };
 
     req.azureMobile.data.execute(query)
-    .then(function (results) {
-      // console.log(`Results len -> ${results.length}`);
-      // console.log(`Results[0] -> ${results[0][0].WholeSalersToSendNotifications}`);
-      // console.log(`Results[1] -> ${results[1][0]}`);
-      if (results.length > 0) {
-        if (results[0].errorCode) {
-          const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
-          res.status(200).json(data);
-        } else {
-          let dataFromDB = JSON.parse(results[0][0].WholeSalersToSendNotifications);
-          // console.log('dataFromDB -> ', dataFromDB);
-          // console.log(results[1][0]);
-          let customer = results[1][0];
-          let fromName = constants.emailName;
-          let fromEmail = constants.emailFrom;
-          let toEmail = customer.email;
-          let toName = customer.name;
-          let subject = 'Horecafy - Lista compartida por restaurador';
-          let body = `<p>Hola, gracias por compartir tus listas. Hemos enviado a los distribuidores que comercializar estos productos tus necesidades. Esperemos que pronto te hagan llegar ofertas.
-          </p><p>Gracias por usar Horecafy</p>`;
-          var attachment = [];
-  
-          var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
-          var emailFrom = [fromEmail, fromName];  
-          
-          utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
-              var jsonEmailResponse = JSON.parse(emailReponse);
-              // console.log('emailReponse.code -> ', jsonEmailResponse.code);
-              if (jsonEmailResponse.code !== 'success') {
-                console.log(`Error during email sending -> ${emailReponse}`);
-                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR , jsonEmailResponse.message , []);
-                res.status(200).json(data);
-                return;
-              }
-              // After sending a notification to customer, let's send notifications to wholersalers
-              if (dataFromDB) {
-                // Try to send email to WholeSalers
-                var notificationsSent = [];
-                async.each(dataFromDB, 
-                  (notification, cb) => {
+      .then(function (results) {
+        
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            let dataFromDB = JSON.parse(results[0][0].WholeSalersToSendNotifications);
+            if (dataFromDB) {
+              // Try to send email to WholeSalers
+              var notificationsSent = [];
+              async.each(dataFromDB,
+                (notification, cb) => {
 
-                    var fromName = constants.emailName;
-                    var fromEmail = constants.emailFrom;
-                    var toEmail = notification.email;
-                    var toName = notification.name;
-                    var subject = 'Propuesta de oferta';
-                    var body = `<p>Hola, has recibido una propuesta de oferta de un restaurador del código postal ${customer.zipCode}. Realiza tu propuesta en la app y se la haremos llegar al restaurador.
+                  var fromName = constants.emailName;
+                  var fromEmail = constants.emailFrom;
+                  var toEmail = notification.email;
+                  var toName = notification.name;
+
+                  var subject = 'Propuesta de oferta';
+                  var body = `<p>Hola, has recibido una propuesta de oferta de un restaurador del código postal ${notification.Customer.zipCode}. Realiza tu propuesta en la app y se la haremos llegar al restaurador.
 
                     Si tienes que realizar varias ofertas ponte en contacto con nosotros en distribuidores@horecafy y te ayudaremos a subir las ofertas en un excel en lugar de hacer una a una en la app.</p><p>Gracias por usar Horecafy</p>`;
-                    var attachment = [];
-            
-                    var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
-                    var emailFrom = [fromEmail, fromName];  
-                    
-                    utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
-                        var jsonEmailResponse = JSON.parse(emailReponse);
-                        // console.log('emailReponse.code -> ', jsonEmailResponse.code);
-                        if (jsonEmailResponse.code !== 'success') {
-                          cb(`Error during email sent to wholesaler -> ${notification.id}`);
-                        }
-                        else {
-                          notificationsSent.push(notification);
-                          cb();
-                        }
-                    });
-                  },
-                  (err) => {
-                    
-                    if (err) {
-                      console.log(err);
-                      // data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, error, []);
+
+                  var attachment = [];
+
+                  var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+                  var emailFrom = [fromEmail, fromName];
+
+                  utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
+                    var jsonEmailResponse = JSON.parse(emailReponse);
+                    // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+                    if (jsonEmailResponse.code !== 'success') {
+                      cb(`Error during email sent to wholesaler -> ${notification.id}`);
                     }
                     else {
-                      //data = utils.buildResponse(notificationsSent.length, null, null, constants.messages.SENDING_EMAIL_SUCCESS, 'Emails sent successfully', notificationsSent);
-                      data = utils.buildResponse(0, null, null, '', '', []); 
+                      notificationsSent.push(notification);
+                      cb();
                     }
-                    res.status(200).json(data);
-                  }
-                );
-              } else {
-                data = utils.buildResponse(0, null, null, '', '', []);          
-                res.status(200).json(data);
-              }
-          });
-        }        
-      } else {
-        const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
-        res.status(200).json(data);
-      }
-    })
-    .catch(function (err) {
-      console.log(err);
-      const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
-      res.status(200).json(data);
-    });    
+                  });
+                },
+                (err) => {
 
-  });    
+                  if (err) {
+                    console.log(err);
+                    // data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, error, []);
+                  }
+                  else {
+                    //data = utils.buildResponse(notificationsSent.length, null, null, constants.messages.SENDING_EMAIL_SUCCESS, 'Emails sent successfully', notificationsSent);
+                    data = utils.buildResponse(0, null, null, '', '', []);
+                  }
+                  res.status(200).json(data);
+                }
+              );
+            } else {
+              data = utils.buildResponse(0, null, null, '', '', []);
+              res.status(200).json(data);
+            }
+          }
+        } else {
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+
+  });
 
   // post demand
-  router.post('/', function(req, res, next) {
+  router.post('/', function (req, res, next) {
 
     console.log(req.body);
 
@@ -196,7 +170,7 @@ module.exports = function () {
         { name: 'typeOfFormatId', value: req.body.typeOfFormatId },
         { name: 'targetPrice', value: req.body.targetPrice },
         { name: 'brand', value: req.body.brand },
-		    { name: 'format', value: req.body.format },
+        { name: 'format', value: req.body.format },
         { name: 'comments', value: req.body.comments },
         { name: 'createdOn', value: new Date() },
         { name: 'borrado', value: false }
@@ -206,46 +180,46 @@ module.exports = function () {
 
     var data = [];
     req.azureMobile.data.execute(query)
-    .then(function (results) {
-      if (results.length > 0) {
-        if (results[0].errorCode) {
-          data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
-          res.status(200).json(data);
-        } else {
-          // console.log(results[1][0]);
-          var fromName = constants.emailName;
-          var fromEmail = constants.emailFrom;
-          var toEmail = results[1][0].email;
-          var toName = results[1][0].name;
-          var subject = 'Horecafy - Lista creada por restaurador';
-          var body = `<p>Hola, gracias por crear una lista con las familias de productos que consumes. Si compartes la lista con los distribuidores podrás recibir ofertas que podrás aprovechar.</p><p>Gracias por usar Horecafy</p>`;
-          var attachment = [];
-  
-          var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
-          var emailFrom = [fromEmail, fromName];  
-          
-          utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            // console.log(results[1][0]);
+            var fromName = constants.emailName;
+            var fromEmail = constants.emailFrom;
+            var toEmail = results[1][0].email;
+            var toName = results[1][0].name;
+            var subject = 'Horecafy - Lista creada por restaurador';
+            var body = `<p>Hola, gracias por crear una lista con las familias de productos que consumes. Si compartes la lista con los distribuidores podrás recibir ofertas que podrás aprovechar.</p><p>Gracias por usar Horecafy</p>`;
+            var attachment = [];
+
+            var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+            var emailFrom = [fromEmail, fromName];
+
+            utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
               var jsonEmailResponse = JSON.parse(emailReponse);
               // console.log('emailReponse.code -> ', jsonEmailResponse.code);
               if (jsonEmailResponse.code !== 'success') {
                 console.log(`Error during email sending -> ${emailReponse}`);
-                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR , jsonEmailResponse.message , []);
+                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
                 res.status(200).json(data);
                 return;
               }
               data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
               res.status(200).json(data);
-          });
-        }        
-      } else {
-        data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+            });
+          }
+        } else {
+          data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
-      }
-    })
-    .catch(function (err) {
-      data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
-      res.status(200).json(data);
-    }); 
+      });
 
     // req.azureMobile.data.execute(query)
     // .then(function (results) {
@@ -270,11 +244,11 @@ module.exports = function () {
   });
 
   // put demand
-  router.put('/', function(req, res, next) {
+  router.put('/', function (req, res, next) {
 
     //console.log('req', req.body);
     if (!utils.validateParam({ 'name': 'customerId', 'value': req.body.customerId }, res)) return;
-    if (!utils.validateParam({ 'name': 'familyId', 'value': req.body.familyId }, res)) return;    
+    if (!utils.validateParam({ 'name': 'familyId', 'value': req.body.familyId }, res)) return;
     if (!utils.validateParam({ 'name': 'typeOfFormatId', 'value': req.body.typeOfFormatId }, res)) return;
 
     var query = {
@@ -289,59 +263,59 @@ module.exports = function () {
         { name: 'brand', value: req.body.brand },
         { name: 'format', value: req.body.format },
         { name: 'comments', value: req.body.comments }
-      ]      
+      ]
     };
 
     req.azureMobile.data.execute(query)
-    .then(function (results) {
-      if (results.length > 0) {
-        if (results[0].errorCode) {
-          const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
-          res.status(200).json(data);
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            const data = utils.buildResponse(results.length, null, null, '', '', results);
+            res.status(200).json(data);
+          }
         } else {
-          const data = utils.buildResponse(results.length, null, null, '', '', results);
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
           res.status(200).json(data);
-        }        
-      } else {
-        const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+        }
+      })
+      .catch(function (err) {
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
-      }
-    })
-    .catch(function (err) {
-      const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
-      res.status(200).json(data);
-    });      
+      });
   });
 
   // delete demand
-  router.delete('/:id', function(req, res, next) {
+  router.delete('/:id', function (req, res, next) {
 
     var query = {
       sql: 'DeleteDemand @id',
       parameters: [
         { name: 'id', value: req.params.id }
-      ]      
+      ]
     };
 
     req.azureMobile.data.execute(query)
-    .then(function (results) {
-      if (results.length > 0) {
-        if (results[0].errorCode) {
-          const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
-          res.status(200).json(data);
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            const data = utils.buildResponse(results[0].totalRows, null, null, '', '', []);
+            res.status(200).json(data);
+          }
         } else {
-          const data = utils.buildResponse(results[0].totalRows, null, null, '', '', []);
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
           res.status(200).json(data);
-        }        
-      } else {
-        const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+        }
+      })
+      .catch(function (err) {
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
-      }
-    })
-    .catch(function (err) {
-      const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
-      res.status(200).json(data);
-    });     
+      });
   });
 
   return router;

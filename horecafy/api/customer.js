@@ -402,9 +402,9 @@ module.exports = function () {
       parameters: [
         { name: 'customerId', value: req.body.customerId },
         { name: 'productName', value: req.body.productName },
-        { name: 'brand', value: utils.md5(req.body.brand) },
+        { name: 'brand', value: req.body.brand },
         { name: 'consumption', value: req.body.consumption },
-        { name: 'targetPrice', value: req.body.targetPrice },
+        { name: 'targetPrice', value: req.body.targetPrice || 0 },
         { name: 'createdOn', value: new Date() }
       ],
       multiple: true
@@ -426,9 +426,9 @@ module.exports = function () {
             var toEmail = "restauradores@horecafy.com";
             var toName = "Horecafy";
             var subject = "Búsqueda producto";
-            var body = `<p>El ${customer.contactName} con nombre EL MESON ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} necesita:</p> 
+            var body = `<p>El cliente ${customer.hiddenId} ${customer.contactName} con nombre ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} necesita:</p> 
             
-            <p>${product.productName}<br /> 
+            <p>producto: ${product.productName}<br /> 
             marca: ${product.brand}<br />
             consumo aproximado: ${product.consumption}<br />
             precio objetivo: ${product.targetPrice}.</p>`;

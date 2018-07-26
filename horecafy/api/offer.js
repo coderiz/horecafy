@@ -249,7 +249,7 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'typeOfFormatId', 'value': req.body.typeOfFormatId }, res)) return;
     if (!utils.validateParam({ 'name': 'offerPrice', 'value': req.body.offerPrice }, res)) return;
     if (!utils.validateParam({ 'name': 'brand', 'value': req.body.brand }, res)) return;
-    if (!utils.validateParam({ 'name': 'fomat', 'value': req.body.fomat }, res)) return;
+    // if (!utils.validateParam({ 'name': 'fomat', 'value': req.body.fomat }, res)) return;
 
     var query = {
       sql: 'CreateOffer @customerId, @demandId, @wholesalerId, @quantyPerMonth, @typeOfFormatId, @offerPrice, @brand, @fomat, @comments, @createdOn, @borrado, @approvedByCustomer, @sentToCustomer, @rejected',
