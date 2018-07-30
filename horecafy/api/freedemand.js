@@ -40,8 +40,11 @@ module.exports = function () {
             var toEmail = "restauradores@horecafy.com";
             var toName = "Horecafy";
             var subject = 'Lista personalizada';
+
+            var demandText = req.body.demandText.replace("," , "<br />");
+            demandText = demandText.replace('"', '');
             
-            var body = `<p>Hola! El ${customer.contactName} ${customer.name} ${customer.address} ${customer.zipCode} ${customer.city} necesita: ${req.body.demandText}</p>`;
+            var body = `<p>Hola! El establecimiento ${customer.contactName} ${customer.hiddenId} ${customer.name} ${customer.address} ${customer.zipCode} ${customer.city} necesita: ${demandText}</p>`;
 
             var attachment = [];
 

@@ -56,7 +56,7 @@ module.exports = {
     },
 	sendEmail: function (emailFrom, emailTo, subject, body, attachment, callback) {
 
-        var client = new Mailin("https://api.sendinblue.com/v2.0","rK1CIs9ZGjkwUOph");
+        var client = new Mailin("https://api.sendinblue.com/v2.0","5cVYhrRL2vUJtQbS");
         data = { 
             to : emailTo,
             from : emailFrom,

@@ -57,15 +57,16 @@ module.exports = function() {
                         
                         var deliveryTime = "";
                         if (order.deliveryTime != "" && order.deliveryTime != "1970-01-01T00:00:00.000Z") {
-                            deliveryTime = `a la hora ${order.deliveryTime}`;
+                            deliveryTime = `a la hora ${moment(order.deliveryTime).format('H:i:s')}`;
                         }
 
-                        var body = `<p>El ${customer.contactName} ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} ${deliveryTime}  los siguientes productos:</p>`;
+                        var body = `<p>El establecimiento ${customer.contactName} ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} ${deliveryTime}  los siguientes productos:</p>`;
                         body = body + `<ul>`;
                         orderProducts.forEach(orderProduct => {
-                            body = `<li>` + body + `${orderProduct.product} / ${orderProduct.quantity} </li>`;
+                            body =  body + `<li>` + `${orderProduct.product} / ${orderProduct.quantity} </li>`;
                         });
-                        body = body + `</ul>`;                        
+                        body = body + `</ul>`;
+                        var customerBody = body;
                         body = body + `<p>Por favor confirma en este enlace que vas a entregar el pedido correctamente <a href="${confirmURL}">${confirmURL}</a>.</p>`;
 
                         var attachment = [];
@@ -74,16 +75,32 @@ module.exports = function() {
                         var emailFrom = [fromEmail, fromName];
 
                         utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
-                            var jsonEmailResponse = JSON.parse(emailReponse);
-                            // console.log('emailReponse.code -> ', jsonEmailResponse.code);
-                            if (jsonEmailResponse.code !== 'success') {
-                                console.log(`Error during email sending -> ${emailReponse}`);
-                                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
+
+                            // send email to customer
+
+                            var fromName = constants.emailName;
+                            var fromEmail = constants.emailFrom;
+                            var toEmail = customer.email;
+                            var toName = customer.name;
+                            var subject = 'Pedido a entregar';
+
+                            var attachment = [];
+
+                            var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+                            var emailFrom = [fromEmail, fromName];
+
+                            utils.sendEmail(emailFrom, emailTo, subject, customerBody, attachment, function (emailReponse) {
+                                var jsonEmailResponse = JSON.parse(emailReponse);
+                                // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+                                if (jsonEmailResponse.code !== 'success') {
+                                    console.log(`Error during email sending -> ${emailReponse}`);
+                                    data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
+                                    res.status(200).json(data);
+                                    return;
+                                }
+                                data = utils.buildResponse(results.length, null, null, '', '', results);
                                 res.status(200).json(data);
-                                return;
-                            }
-                            data = utils.buildResponse(results.length, null, null, '', '', results);
-                            res.status(200).json(data);
+                            });
                         });
                     }
                 } else {
@@ -130,11 +147,11 @@ module.exports = function() {
                         var toName = customer.name;
 
                         var subject = 'Confirmación envio pedido';
-                        var body = `El distribuidor ${wholesaler.contactName} ha confirmado la entrega a el ${customer.contactName} ${customer.name} el día ${moment(order.deliveryDate).format('MMM Do YYYY')} del siguiente producto:`;
+                        var body = `El distribuidor ${wholesaler.contactName} ha confirmado la entrega a el ${customer.contactName} ${customer.hiddenId} ${customer.name} el día ${moment(order.deliveryDate).format('MMM Do YYYY')} del siguiente producto:`;
 
                         body = body + `<ul>`;
                         orderProducts.forEach(orderProduct => {
-                            body = `<li>` + body + `${orderProduct.product} ${orderProduct.quantity} </li>`;
+                            body = body + `<li>` + `${orderProduct.product} / ${orderProduct.quantity} </li>`;
                         });
                         body = body + `</ul>`;
 
@@ -198,7 +215,7 @@ module.exports = function() {
                         var subject = `${customer.name} te quiere invitar a Horecafy.`;
 
                         var body = `<p>¡Hola!</p> 
-                                    <p>El ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} te ha enviado una invitación para poder enviarte pedidos a través de  Horecafy.</p> 
+                                    <p>El establecimiento ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} te ha enviado una invitación para poder enviarte pedidos a través de  Horecafy.</p> 
                                     <p>Visita nuestra web y ,únete ya a nuestra familia! Esperamos recibir noticias tuyas pronto.</p> 
                                     <p>Un saludo, equipo Horecafy</p>`;
 

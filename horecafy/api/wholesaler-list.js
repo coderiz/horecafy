@@ -63,31 +63,35 @@ module.exports = function () {
           data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
           res.status(200).json(data);
         } else {
+
+          data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+          res.status(200).json(data);
+
           // console.log(results[1][0]);
-          var fromName = constants.emailName;
-          var fromEmail = constants.emailFrom;
-          var toEmail = results[1][0].email;
-          var toName = results[1][0].name;
-          var subject = 'Horecafy - Lista creada por distribuidor';
-          var body = `<p>Hola, gracias por crear una lista con las familias de productos que comercializas. Esperamos que muy pronto te lleguen solicitudes de oferta por parte de los restauradores.</p>
-                      <p>Gracias por usar Horecafy</p>`;
-          var attachment = [];
+          // var fromName = constants.emailName;
+          // var fromEmail = constants.emailFrom;
+          // var toEmail = results[1][0].email;
+          // var toName = results[1][0].name;
+          // var subject = 'Horecafy - Lista creada por distribuidor';
+          // var body = `<p>Hola, gracias por crear una lista con las familias de productos que comercializas. Esperamos que muy pronto te lleguen solicitudes de oferta por parte de los restauradores.</p>
+          //             <p>Gracias por usar Horecafy</p>`;
+          // var attachment = [];
   
-          var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
-          var emailFrom = [fromEmail, fromName];  
+          // var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+          // var emailFrom = [fromEmail, fromName];  
           
-          utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
-              var jsonEmailResponse = JSON.parse(emailReponse);
-              // console.log('emailReponse.code -> ', jsonEmailResponse.code);
-              if (jsonEmailResponse.code !== 'success') {
-                console.log(`Error during email sending -> ${emailReponse}`);
-                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR , jsonEmailResponse.message , []);
-                res.status(200).json(data);
-                return;
-              }
-              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
-              res.status(200).json(data);
-          });
+          // utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function(emailReponse) {
+          //     var jsonEmailResponse = JSON.parse(emailReponse);
+          //     // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+          //     if (jsonEmailResponse.code !== 'success') {
+          //       console.log(`Error during email sending -> ${emailReponse}`);
+          //       data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR , jsonEmailResponse.message , []);
+          //       res.status(200).json(data);
+          //       return;
+          //     }
+          //     data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+          //     res.status(200).json(data);
+          // });
         }        
       } else {
         data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);

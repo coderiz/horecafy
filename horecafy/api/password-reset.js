@@ -151,35 +151,8 @@ module.exports = function () {
                                         data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
                                         res.status(200).json(data);
                                     } else {
-
-                                        var user = results[0];
-                                        var fromName = constants.emailName;
-                                        var fromEmail = constants.emailFrom;
-                                        var toEmail = user.email;
-                                        var toName = user.name;
-                                        var subject = 'Horecafy - Registro de distribuidor';
-                                        var body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
-
-                                                    <p>Si tienes que incorporar muchas familias a tus listas ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo una a una en la app.</p> 
-                                                    
-                                                    <p>Gracias por usar Horecafy</p>`;
-                                        var attachment = [];
-
-                                        var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
-                                        var emailFrom = [fromEmail, fromName];
-
-                                        utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
-                                            var jsonEmailResponse = JSON.parse(emailReponse);
-                                            // console.log('emailReponse.code -> ', jsonEmailResponse.code);
-                                            if (jsonEmailResponse.code !== 'success') {
-                                                console.log(`Error during email sending -> ${emailReponse}`);
-                                                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
-                                                res.status(200).json(data);
-                                                return;
-                                            }
-                                            data = utils.buildResponse(results.length, null, null, '', '', results);
-                                            res.status(200).json(data);
-                                        });
+                                        data = utils.buildResponse(results.length, null, null, '', '', results);
+                                        res.status(200).json(data);
                                     }
                                 } else {
                                     data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);

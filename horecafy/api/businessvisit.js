@@ -157,7 +157,8 @@ module.exports = function () {
       parameters: [
         { name: 'id', value: req.params.id },
         { name: 'timeslot', value: req.body.timeslot }
-      ]
+      ],
+      multiple: true
     };
 
     req.azureMobile.data.execute(query)
@@ -167,8 +168,37 @@ module.exports = function () {
             const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
             res.status(200).json(data);
           } else {
-            const data = utils.buildResponse(results.length, null, null, '', '', results[0]);
-            res.status(200).json(data);
+
+            var businessVisit = results[0][0];
+            var wholesaler = results[1][0];
+            var customer = results[2][0];
+
+            var fromName = constants.emailName;
+            var fromEmail = constants.emailFrom;
+            var toEmail = customer.email;
+            var toName = customer.name;
+            var subject = "Visita comercial confirmada";
+            var body = `<p>Hola,</p> 
+                        <p>El distribuidor ${wholesaler.name} ha confirmado la reunión para el día ${businessVisit.timeslot}  sobre: "${businessVisit.comments}".</p>
+                        <p>Sus datos de contacto son: contacto: ${wholesaler.contactName}, Teléfono:${wholesaler.contactMobile}.</p>`;
+
+            var attachment = [];
+
+            var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+            var emailFrom = [fromEmail, fromName];
+
+            utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
+              var jsonEmailResponse = JSON.parse(emailReponse);
+              // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+              if (jsonEmailResponse.code !== 'success') {
+                console.log(`Error during email sending -> ${emailReponse}`);
+                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
+                res.status(200).json(data);
+                return;
+              }
+              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+              res.status(200).json(data);
+            });
           }
         } else {
           const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
@@ -181,7 +211,7 @@ module.exports = function () {
       });
   });
 
-  // delete demand
+  // delete business visit
   router.delete('/:id', function (req, res, next) {
 
     var query = {
