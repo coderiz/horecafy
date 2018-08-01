@@ -426,7 +426,7 @@ module.exports = function () {
             var toEmail = "restauradores@horecafy.com";
             var toName = "Horecafy";
             var subject = "Búsqueda producto";
-            var body = `<p>El cliente ${customer.hiddenId} con nombre ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} necesita:</p> 
+            var body = `<p>Hola! El establecimiento ${customer.name} ${customer.hiddenId} con código postal ${customer.zipCode} en calle ${customer.address} ${customer.city} con email ${customer.email} y teléfono ${customer.contactMobile} necesita: necesita:</p> 
             
             <p>producto: ${product.productName}<br /> 
             marca: ${product.brand}<br />

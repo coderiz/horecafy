@@ -44,7 +44,7 @@ module.exports = function () {
             var demandText = req.body.demandText.replace("," , "<br />");
             demandText = demandText.replace('"', '');
             
-            var body = `<p>Hola! El establecimiento ${customer.contactName} ${customer.hiddenId} ${customer.name} ${customer.address} ${customer.zipCode} ${customer.city} necesita: ${demandText}</p>`;
+            var body = `<p>Hola! El establecimiento ${customer.name} ${customer.hiddenId} con código postal ${customer.zipCode} en calle ${customer.address} ${customer.city} con email ${customer.email} y teléfono ${customer.contactMobile} necesita: ${demandText}</p>`;
 
             var attachment = [];
 

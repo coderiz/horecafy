@@ -87,26 +87,60 @@ module.exports = function () {
       sql: 'AcceptBusinessVisit @id',
       parameters: [
         { name: 'id', value: req.params.id }
-      ]
+      ],
+      multiple: true
     };
 
     var data = [];
     req.azureMobile.data.execute(query)
       .then(function (results) {
+
         if (results.length > 0) {
           if (results[0].errorCode) {
             data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
             res.status(200).json(data);
           } else {
-            data = utils.buildResponse(results.length, null, null, '', '', results[0]);
-            res.status(200).json(data);
+            var businessVisit = results[0][0];
+            var wholesaler = results[1][0];
+            var customer = results[2][0];
+
+            var fromName = constants.emailName;
+            var fromEmail = constants.emailFrom;
+
+            var toEmail = wholesaler.email;
+            var toName = wholesaler.name;
+
+            var subject = "Visita comercial confirmada";
+            var body = `<p>Hola,</p> 
+                        <p>El establecimiento ${wholesaler.name} con código postal ${wholesaler.zipCode} en calle ${wholesaler.address} ha aceptado tu propuesta de visita.</p> 
+                        <p>Entra en la aplicación en la zona de “visitas comerciales” y selecciona el dia y hora que mejor te vengan entre las propuestas por el restaurador.</p> 
+                        <p>Muchas gracias. El Equipo de Horecafy.</p>`;
+
+            var attachment = [];
+
+            var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+            var emailFrom = [fromEmail, fromName];
+
+            utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
+              var jsonEmailResponse = JSON.parse(emailReponse);
+              // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+              if (jsonEmailResponse.code !== 'success') {
+                console.log(`Error during email sending -> ${emailReponse}`);
+                data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
+                res.status(200).json(data);
+                return;
+              }
+              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+              res.status(200).json(data);
+            });
           }
         } else {
-          data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
           res.status(200).json(data);
         }
       })
       .catch(function (err) {
+        console.log(err);
         data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
       });
@@ -175,8 +209,13 @@ module.exports = function () {
 
             var fromName = constants.emailName;
             var fromEmail = constants.emailFrom;
+
             var toEmail = customer.email;
             var toName = customer.name;
+
+            var ccEmail = wholesaler.email;
+            var ccName = wholesaler.name;
+
             var subject = "Visita comercial confirmada";
             var body = `<p>Hola,</p> 
                         <p>El distribuidor ${wholesaler.name} ha confirmado la reunión para el día ${businessVisit.timeslot}  sobre: "${businessVisit.comments}".</p>
@@ -185,9 +224,10 @@ module.exports = function () {
             var attachment = [];
 
             var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+            var emailCC = JSON.parse('{"' + ccEmail + '":"' + ccName + '"}');
             var emailFrom = [fromEmail, fromName];
 
-            utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
+            utils.sendCCEmail(emailFrom, emailTo, emailCC, subject, body, attachment, function (emailReponse) {
               var jsonEmailResponse = JSON.parse(emailReponse);
               // console.log('emailReponse.code -> ', jsonEmailResponse.code);
               if (jsonEmailResponse.code !== 'success') {

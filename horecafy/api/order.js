@@ -57,10 +57,10 @@ module.exports = function() {
                         
                         var deliveryTime = "";
                         if (order.deliveryTime != "" && order.deliveryTime != "1970-01-01T00:00:00.000Z") {
-                            deliveryTime = `a la hora ${moment(order.deliveryTime).format('H:i:s')}`;
+                            deliveryTime = `a la hora ${moment(order.deliveryTime).format('HH:mm:ss')}`;
                         }
 
-                        var body = `<p>El establecimiento ${customer.contactName} ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} ${deliveryTime}  los siguientes productos:</p>`;
+                        var body = `<p>El establecimiento ${customer.name} en ${customer.address}, ${customer.zipCode} ${customer.city} telf: ${customer.contactMobile} necesita que le entreguen el día ${moment(order.deliveryDate).format('MMM Do YYYY')} ${deliveryTime}  los siguientes productos:</p>`;
                         body = body + `<ul>`;
                         orderProducts.forEach(orderProduct => {
                             body =  body + `<li>` + `${orderProduct.product} / ${orderProduct.quantity} </li>`;
@@ -147,7 +147,7 @@ module.exports = function() {
                         var toName = customer.name;
 
                         var subject = 'Confirmación envio pedido';
-                        var body = `El distribuidor ${wholesaler.contactName} ha confirmado la entrega a el ${customer.contactName} ${customer.hiddenId} ${customer.name} el día ${moment(order.deliveryDate).format('MMM Do YYYY')} del siguiente producto:`;
+                        var body = `El distribuidor ${wholesaler.contactName} ha confirmado la entrega a el ${customer.name} ${customer.hiddenId} el día ${moment(order.deliveryDate).format('MMM Do YYYY')} del siguiente producto:`;
 
                         body = body + `<ul>`;
                         orderProducts.forEach(orderProduct => {
@@ -215,11 +215,9 @@ module.exports = function() {
                         var subject = `${customer.name} te quiere invitar a Horecafy.`;
 
                         var body = `<p>¡Hola!</p> 
-                                    <p>El establecimiento ${customer.contactName} ${customer.name} de ${customer.address}, ${customer.zipCode} de ${customer.city} te ha enviado una invitación para poder enviarte pedidos a través de  Horecafy.</p> 
-                                    <p>Visita nuestra web y ,únete ya a nuestra familia! Esperamos recibir noticias tuyas pronto.</p> 
+                                    <p>El establecimiento ${customer.name} en ${customer.zipCode} calle XX ${customer.address} con contacto ${customer.contactName} te invita a que te registres en horecafy para poder enviarte pedidos de compra.</p>
+                                    <p>Además podrás beneficiarse de muchas ventajas. Entra en <a href="http://www.horecafy.com">horecafy.com</a>.</p>
                                     <p>Un saludo, equipo Horecafy</p>`;
-
-                                    console.log(body);
 
                         var attachment = [];
 

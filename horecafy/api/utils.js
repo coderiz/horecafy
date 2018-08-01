@@ -56,20 +56,27 @@ module.exports = {
     },
 	sendEmail: function (emailFrom, emailTo, subject, body, attachment, callback) {
 
-        var client = new Mailin("https://api.sendinblue.com/v2.0","5cVYhrRL2vUJtQbS");
-        data = { 
-            to : emailTo,
-            from : emailFrom,
-            subject : subject,
-            html : body,
-            attachment : attachment
+        this.sendCCEmail(emailFrom, emailTo, {}, subject, body, attachment, function(response) {
+            callback(response);  
+        });
+    },
+    sendCCEmail: function (emailFrom, emailTo, emailCC, subject, body, attachment, callback) {
+
+        var client = new Mailin("https://api.sendinblue.com/v2.0", "5cVYhrRL2vUJtQbS");
+        data = {
+            to: emailTo,
+            cc: emailCC,
+            from: emailFrom,
+            subject: subject,
+            html: body,
+            attachment: attachment
         }
         // console.log('data -> ', data);
 
-        client.send_email(data).on('complete', function(response) {
+        client.send_email(data).on('complete', function (response) {
             // console.log(response);
             callback(response);
-        });        
+        });
     },    
     buildResponse: function(totalRows, page, rows, error, message, data) {
         return {
