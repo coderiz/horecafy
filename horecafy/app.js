@@ -44,7 +44,7 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'api/public')));
 
 app.use(function (req, res, next) {

@@ -151,6 +151,92 @@ module.exports = function () {
 
   });
 
+  // share multiple demand
+  router.post('/share', function (req, res, next) {
+
+    if (!utils.validateParam({ 'name': 'ids', 'value': req.body.ids }, res)) return;
+
+    var query = {
+      sql: 'ShareMultipleDemand @id',
+      parameters: [
+        { name: 'ids', value: req.body.ids }
+      ],
+      multiple: true
+    };
+
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            let dataFromDB = JSON.parse(results[0][0].WholeSalersToSendNotifications);
+            if (dataFromDB) {
+              // Try to send email to WholeSalers
+              var notificationsSent = [];
+              async.each(dataFromDB,
+                (notification, cb) => {
+
+                  var fromName = constants.emailName;
+                  var fromEmail = constants.emailFrom;
+                  var toEmail = notification.email;
+                  var toName = notification.name;
+
+                  var subject = 'Propuesta de oferta';
+                  var body = `<p>Hola, has recibido una propuesta de oferta de un restaurador del código postal ${notification.Customer.zipCode}. Realiza tu propuesta en la app y se la haremos llegar al restaurador.
+
+                    Si tienes que realizar varias ofertas ponte en contacto con nosotros en distribuidores@horecafy y te ayudaremos a subir las ofertas en un excel en lugar de hacer una a una en la app.</p><p>Gracias por usar Horecafy</p>`;
+
+                  var attachment = [];
+
+                  var emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
+                  var emailFrom = [fromEmail, fromName];
+
+                  utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
+                    var jsonEmailResponse = JSON.parse(emailReponse);
+                    // console.log('emailReponse.code -> ', jsonEmailResponse.code);
+                    if (jsonEmailResponse.code !== 'success') {
+                      cb(`Error during email sent to wholesaler -> ${notification.id}`);
+                    }
+                    else {
+                      notificationsSent.push(notification);
+                      cb();
+                    }
+                  });
+                },
+                (err) => {
+
+                  if (err) {
+                    console.log(err);
+                    // data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, error, []);
+                  }
+                  else {
+                    //data = utils.buildResponse(notificationsSent.length, null, null, constants.messages.SENDING_EMAIL_SUCCESS, 'Emails sent successfully', notificationsSent);
+                    data = utils.buildResponse(0, null, null, '', '', []);
+                  }
+                  res.status(200).json(data);
+                }
+              );
+            } else {
+              data = utils.buildResponse(0, null, null, '', '', []);
+              res.status(200).json(data);
+            }
+          }
+        } else {
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+
+  });
+
   // post demand
   router.post('/', function (req, res, next) {
 
@@ -319,6 +405,44 @@ module.exports = function () {
         const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
       });
+  });
+
+  // Decline demand
+  router.post('/decline', function (req, res, next) {
+
+    if (!utils.validateParam({ 'name': 'demandId', 'value': req.body.demandId }, res)) return;
+    if (!utils.validateParam({ 'wholesalerId': 'familyId', 'value': req.body.wholesalerId }, res)) return;
+
+    var query = {
+      sql: 'DeclineDemand @demandId, @wholesalerId',
+      parameters: [
+        { name: 'demandId', value: req.body.demandId },
+        { name: 'wholesalerId', value: req.body.wholesalerId }
+      ],
+      multiple: true
+    };
+
+    var data = [];
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+            res.status(200).json(data);
+          }
+        } else {
+          data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+
   });
 
   return router;

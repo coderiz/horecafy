@@ -383,5 +383,45 @@ module.exports = function () {
       });
   });
 
+  // get wholesaler statitstics
+  router.get('/stats/:id', function (req, res, next) {
+
+    var query = {
+      sql: 'GetWholesalerStats @wholesalerId',
+      parameters: [
+        { name: 'wholesalerId', value: req.params.id }
+      ],
+
+      multiple: true
+    };
+
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            
+            var response = Array();
+            results.forEach(result => {
+              response.push(result[0]);
+            });
+
+            const data = utils.buildResponse(response.length, null, null, '', '', response);
+            res.status(200).json(data);
+          }
+        } else {
+          const data = utils.buildResponse(0, null, null, constants.errors.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        // can be emtpy
+        const data = utils.buildResponse(0, null, null, '', '', []);
+        res.status(200).json(data);
+      });
+  });
+
   return router;
 }

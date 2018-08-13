@@ -244,7 +244,7 @@ module.exports = function () {
   router.post('/', function (req, res, next) {
 
     //console.log('req', req.body);
-    if (!utils.validateParam({ 'name': 'VAT', 'value': req.body.VAT }, res)) return;
+    // if (!utils.validateParam({ 'name': 'VAT', 'value': req.body.VAT }, res)) return;
     if (!utils.validateParam({ 'name': 'email', 'value': req.body.email }, res)) return;
     if (!utils.validateParam({ 'name': 'password', 'value': req.body.password }, res)) return;
     if (!utils.validateParam({ 'name': 'name', 'value': req.body.name }, res)) return;
@@ -256,12 +256,12 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'city', 'value': req.body.city }, res)) return;
     if (!utils.validateParam({ 'name': 'zipCode', 'value': req.body.zipCode }, res)) return;
     if (!utils.validateParam({ 'name': 'province', 'value': req.body.province }, res)) return;
-    if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
+    // if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
 
     var query = {
       sql: 'CreateCustomer @VAT, @email, @password, @name, @typeOfBusinessId, @contactName, @contactEmail, @contactMobile, @address, @city, @zipCode, @province, @country, @createdOn, @visible',
       parameters: [
-        { name: 'VAT', value: req.body.VAT },
+        { name: 'VAT', value: '' },
         { name: 'email', value: req.body.email },
         { name: 'password', value: utils.md5(req.body.password) },
         { name: 'name', value: req.body.name },
@@ -273,7 +273,7 @@ module.exports = function () {
         { name: 'city', value: req.body.city },
         { name: 'zipCode', value: req.body.zipCode },
         { name: 'province', value: req.body.province },
-        { name: 'country', value: req.body.country },
+        { name: 'country', value: '' },
         { name: 'createdOn', value: new Date() },
         { name: 'visible', value: true }
       ]
@@ -330,7 +330,7 @@ module.exports = function () {
     //console.log('req', req.body);
     if (!utils.validateParam({ 'name': 'hiddenId', 'value': req.body.hiddenId }, res)) return;
     if (!utils.validateParam({ 'name': 'id', 'value': req.body.id }, res)) return;
-    if (!utils.validateParam({ 'name': 'VAT', 'value': req.body.VAT }, res)) return;
+    // if (!utils.validateParam({ 'name': 'VAT', 'value': req.body.VAT }, res)) return;
     if (!utils.validateParam({ 'name': 'email', 'value': req.body.email }, res)) return;
     if (!utils.validateParam({ 'name': 'name', 'value': req.body.name }, res)) return;
     if (!utils.validateParam({ 'name': 'typeOfBusinessId', 'value': req.body.typeOfBusinessId }, res)) return;
@@ -341,7 +341,7 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'city', 'value': req.body.city }, res)) return;
     if (!utils.validateParam({ 'name': 'zipCode', 'value': req.body.zipCode }, res)) return;
     if (!utils.validateParam({ 'name': 'province', 'value': req.body.province }, res)) return;
-    if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
+    // if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
 
 
     var query = {
@@ -349,7 +349,7 @@ module.exports = function () {
       parameters: [
         { name: 'hiddenId', value: req.body.hiddenId },
         { name: 'id', value: req.body.id },
-        { name: 'VAT', value: req.body.VAT },
+        { name: 'VAT', value: '' },
         { name: 'email', value: req.body.email },
         { name: 'name', value: req.body.name },
         { name: 'typeOfBusinessId', value: req.body.typeOfBusinessId },
@@ -360,7 +360,7 @@ module.exports = function () {
         { name: 'city', value: req.body.city },
         { name: 'zipCode', value: req.body.zipCode },
         { name: 'province', value: req.body.province },
-        { name: 'country', value: req.body.country },
+        { name: 'country', value: '' },
         { name: 'visible', value: req.body.visible == 1 ? true : false }
       ]
     };
@@ -522,6 +522,47 @@ module.exports = function () {
       })
       .catch(function (err) {
         const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+
+  });
+
+  // get customer statitstics
+  router.get('/stats/:id', function (req, res, next) {
+
+    var query = {
+      sql: 'GetCustomerStats @customerId',
+      parameters: [
+        { name: 'customerId', value: req.params.id }
+      ],
+
+      multiple: true
+    };
+
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+
+            var response = Array();
+            results.forEach(result => {
+              response.push(result[0]);
+            });
+
+            const data = utils.buildResponse(response.length, null, null, '', '', response);
+            res.status(200).json(data);
+          }
+        } else {
+          const data = utils.buildResponse(0, null, null, constants.errors.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        // can be emtpy
+        const data = utils.buildResponse(0, null, null, '', '', []);
         res.status(200).json(data);
       });
 

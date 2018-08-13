@@ -1,6 +1,7 @@
 var express = require('express');
 var utils = require('./utils');
 var constants = require('./constants');
+var multer = require('multer');
 
 module.exports = function () {
 
@@ -78,17 +79,20 @@ module.exports = function () {
   router.post('/customer', function (req, res, next) {
 
     if (!utils.validateParam({ 'name': 'customerId', 'value': req.body.customerId }, res)) return;
-    console.log(req.body);
 
     var query = {
-      sql: 'GetOffersByCustomerId @customerId',
+      sql: 'GetOffersByCustomerId @customerId, @categoryId, @demandId , @borrado',
       parameters: [
-        { name: 'customerId', value: req.body.customerId }
+        { name: 'customerId', value: req.body.customerId },
+        { name: 'categoryId', value: null },
+        { name: 'demandId', value: null },
+        { name: 'borrado', value: req.body.borrado || 0 }
       ]
     };
+
     req.azureMobile.data.execute(query)
       .then(function (results) {
-        
+
         if (results.length > 0) {
           if (results[0].errorCode) {
             const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
@@ -280,10 +284,43 @@ module.exports = function () {
 
   });
 
+  // Decline offer
+  router.get('/decline/:id', function (req, res, next) {
+
+    var query = {
+      sql: 'DeclineOffer @id',
+      parameters: [
+        { name: 'id', value: req.params.id }
+      ],
+      multiple: true
+    };
+
+    var data = [];
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+            res.status(200).json(data);
+          }
+        } else {
+          data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+
+  });
+
   // post offer
   router.post('/', function (req, res, next) {
 
-    //console.log('req', req.body);
     if (!utils.validateParam({ 'name': 'customerId', 'value': req.body.customerId }, res)) return;
     if (!utils.validateParam({ 'name': 'demandId', 'value': req.body.demandId }, res)) return;
     if (!utils.validateParam({ 'name': 'wholesalerId', 'value': req.body.wholesalerId }, res)) return;
@@ -291,7 +328,7 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'typeOfFormatId', 'value': req.body.typeOfFormatId }, res)) return;
     if (!utils.validateParam({ 'name': 'offerPrice', 'value': req.body.offerPrice }, res)) return;
     if (!utils.validateParam({ 'name': 'brand', 'value': req.body.brand }, res)) return;
-    // if (!utils.validateParam({ 'name': 'fomat', 'value': req.body.fomat }, res)) return;
+    if (!utils.validateParam({ 'name': 'fomat', 'value': req.body.fomat }, res)) return;
 
     var query = {
       sql: 'CreateOffer @customerId, @demandId, @wholesalerId, @quantyPerMonth, @typeOfFormatId, @offerPrice, @brand, @fomat, @comments, @createdOn, @borrado, @approvedByCustomer, @sentToCustomer, @rejected',
@@ -381,6 +418,78 @@ module.exports = function () {
         data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
       });
+  });
+
+  // post offer images
+  router.put('/:offerId', function (req, res, next) {
+
+    var storage = multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, 'api/public/uploads/')
+      },
+      filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + "-" + file.originalname)
+      }
+    });
+
+    var upload = multer({ storage: storage })
+    var cpUpload = upload.fields([{ name: 'images', maxCount: 3 }, { name: 'video', maxCount: 1 }]);
+
+    cpUpload(req, res, function (err) {
+
+      if (err) {
+        console.log(err);
+      }
+
+      var arrImages = Array();
+      if (req.files['images'] !== undefined) {
+        req.files['images'].forEach(file => {
+          arrImages.push(file.filename);
+        });
+      }
+
+      var arrVideos = Array();
+      if (req.files['video'] !== undefined) {
+        req.files['video'].forEach(file => {
+          arrVideos.push(file.filename);
+        });
+      }
+
+      var images = arrImages.join(",");
+      var video = arrVideos.join(",");
+
+      var query = {
+        sql: 'UpdateOffer @id, @images, @video',
+        parameters: [
+          { name: 'id', value: req.params.offerId },
+          { name: 'images', value: images },
+          { name: 'video', value: video }
+        ],
+        multiple: true
+      };
+
+      var data = [];
+      req.azureMobile.data.execute(query)
+        .then(function (results) {
+          if (results.length > 0) {
+            if (results[0].errorCode) {
+              data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+              res.status(200).json(data);
+            } else {
+              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+              res.status(200).json(data);
+            }
+          } else {
+            data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+            res.status(200).json(data);
+          }
+        })
+        .catch(function (err) {
+          data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+          res.status(200).json(data);
+        });
+
+    });
   });
 
   return router;
