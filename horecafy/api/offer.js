@@ -2,6 +2,7 @@ var express = require('express');
 var utils = require('./utils');
 var constants = require('./constants');
 var multer = require('multer');
+var path = require('path');
 
 module.exports = function () {
 
@@ -425,7 +426,7 @@ module.exports = function () {
 
     var storage = multer.diskStorage({
       destination: function (req, file, cb) {
-        cb(null, 'api/public/uploads/')
+        cb(null, path.join(__dirname, 'public/uploads/'))
       },
       filename: function (req, file, cb) {
         cb(null, file.fieldname + '-' + Date.now() + "-" + file.originalname)

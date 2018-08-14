@@ -129,7 +129,7 @@ module.exports = function () {
   router.post('/category', function (req, res, next) {
 
     if (!utils.validateParam({ 'name': 'wholesalerId', 'value': req.body.wholesalerId }, res)) return;
-    if (!utils.validateParam({ 'name': 'categoryId', 'value': req.body.categoryIds }, res)) return;
+    if (!utils.validateParam({ 'name': 'categoryIds', 'value': req.body.categoryIds }, res)) return;
     // if (!utils.validateParam({ 'name': 'brand', 'value': req.body.brand }, res)) return;
 
     var query = {

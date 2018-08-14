@@ -185,12 +185,14 @@ module.exports = function () {
   router.put('/:id', function (req, res, next) {
 
     //console.log('req', req.body);
+    if (!utils.validateParam({ 'name': 'visitDate', 'value': req.body.visitDate }, res)) return;
     if (!utils.validateParam({ 'name': 'timeslot', 'value': req.body.timeslot }, res)) return;
 
     var query = {
-      sql: 'UpdateBusinessVisit @id, @timeslot',
+      sql: 'UpdateBusinessVisit @id, @visitDate, @timeslot',
       parameters: [
         { name: 'id', value: req.params.id },
+        { name: 'visitDate', value: new Date(req.body.visitDate) },
         { name: 'timeslot', value: req.body.timeslot }
       ],
       multiple: true
