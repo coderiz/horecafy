@@ -3,6 +3,7 @@ var utils = require('./utils');
 var constants = require('./constants');
 var async = require('async');
 var multer = require('multer');
+var path = require('path');
 
 module.exports = function () {
 
@@ -48,7 +49,7 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'wholesalerId', 'value': req.body.wholesalerId }, res)) return;
 
     var query = {
-      sql: 'CreateBusinessVisit @wholesalerId, @zipcode, @typeOfBusinessId, @comments, @createdOn, @borrado, @images, @video',
+      sql: 'CreateBusinessVisit @wholesalerId, @zipcode, @typeOfBusinessId, @comments, @createdOn, @borrado',
       parameters: [
         { name: 'wholesalerId', value: req.body.wholesalerId },
         { name: 'zipcode', value: req.body.zipcode },
@@ -79,6 +80,74 @@ module.exports = function () {
         data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
       });
+  });
+
+  // post business visit images
+  router.put('/upload/:groupId', function (req, res, next) {
+
+    var storage = multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, 'public/uploads/'))
+      },
+      filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + "-" + file.originalname)
+      }
+    });
+
+    var upload = multer({ storage: storage })
+    var cpUpload = upload.fields([{ name: 'images', maxCount: 3 }, { name: 'video', maxCount: 1 }]);
+
+    cpUpload(req, res, function (err) {
+
+      var arrImages = Array();
+      if (req.files['images'] !== undefined) {
+        req.files['images'].forEach(file => {
+          arrImages.push(file.filename);
+        });
+      }
+
+      var arrVideos = Array();
+      if (req.files['video'] !== undefined) {
+        req.files['video'].forEach(file => {
+          arrVideos.push(file.filename);
+        });
+      }
+
+      var images = arrImages.join(",");
+      var video = arrVideos.join(",");
+
+      var query = {
+        sql: 'UpdateBusinessVisitImages @groupId, @images, @video',
+        parameters: [
+          { name: 'groupId', value: req.params.groupId },
+          { name: 'images', value: images },
+          { name: 'video', value: video }
+        ],
+        multiple: true
+      };
+
+      var data = [];
+      req.azureMobile.data.execute(query)
+        .then(function (results) {
+          if (results.length > 0) {
+            if (results[0].errorCode) {
+              data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
+              res.status(200).json(data);
+            } else {
+              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+              res.status(200).json(data);
+            }
+          } else {
+            data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+            res.status(200).json(data);
+          }
+        })
+        .catch(function (err) {
+          data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+          res.status(200).json(data);
+        });
+
+    });
   });
 
   // Accept business visit

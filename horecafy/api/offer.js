@@ -438,10 +438,6 @@ module.exports = function () {
 
     cpUpload(req, res, function (err) {
 
-      if (err) {
-        console.log(err);
-      }
-
       var arrImages = Array();
       if (req.files['images'] !== undefined) {
         req.files['images'].forEach(file => {
