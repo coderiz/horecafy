@@ -36,6 +36,37 @@ module.exports = function () {
         });  
   });
 
+  router.get('/:id', function (req, res, next) {
+
+    var query = {
+      sql: 'GetCategoriesByWholesalerId  @id',
+      parameters: [
+        { name: 'id', value: req.params.id }
+      ]
+    };
+
+    req.azureMobile.data.execute(query)
+      .then(function (results) {
+        //console.log('results', results);
+        if (results.length > 0) {
+          if (results[0].errorCode) {
+            const data = utils.buildResponse(0, null, null, results.errorCode, '', []);
+            res.status(200).json(data);
+          } else {
+            const data = utils.buildResponse(results.length, null, null, '', '', results);
+            res.status(200).json(data);
+          }
+        } else {
+          const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+          res.status(200).json(data);
+        }
+      })
+      .catch(function (err) {
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
+        res.status(200).json(data);
+      });
+  });
+
   // Get all categories from a customer in a demand with family count
   router.get('/demand/family', function(req, res, next) {
 

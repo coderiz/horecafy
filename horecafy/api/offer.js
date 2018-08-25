@@ -102,7 +102,21 @@ module.exports = function () {
             // console.log('JSON output -> ', JSON.parse(results[0]["Demands"]));
             let dataFromDB = JSON.parse(results[0]["Offers"]);
             if (dataFromDB !== null && dataFromDB.length > 0) {
-              const data = utils.buildResponse(dataFromDB.length, null, null, '', '', dataFromDB);
+
+              var response = new Array();
+              dataFromDB.forEach(obj => {
+                if (obj.images === undefined) {
+                  obj.images = "";
+                }
+
+                if (obj.video === undefined) {
+                  obj.video = "";
+                }
+
+                response.push(obj);
+              });
+
+              const data = utils.buildResponse(response.length, null, null, '', '', response);
               res.status(200).json(data);
             } else {
               const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);

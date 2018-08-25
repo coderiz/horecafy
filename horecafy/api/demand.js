@@ -408,10 +408,10 @@ module.exports = function () {
   });
 
   // Decline demand
-  router.post('/decline', function (req, res, next) {
+  router.delete('/decline', function (req, res, next) {
 
     if (!utils.validateParam({ 'name': 'demandId', 'value': req.body.demandId }, res)) return;
-    if (!utils.validateParam({ 'wholesalerId': 'familyId', 'value': req.body.wholesalerId }, res)) return;
+    if (!utils.validateParam({ 'name': 'wholesalerId', 'value': req.body.wholesalerId }, res)) return;
 
     var query = {
       sql: 'DeclineDemand @demandId, @wholesalerId',

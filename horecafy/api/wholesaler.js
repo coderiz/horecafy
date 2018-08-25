@@ -214,7 +214,7 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'city', 'value': req.body.city }, res)) return;
     if (!utils.validateParam({ 'name': 'zipCode', 'value': req.body.zipCode }, res)) return;
     if (!utils.validateParam({ 'name': 'province', 'value': req.body.province }, res)) return;
-    if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
+    // if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
 
     var query = {
       sql: 'CreateWholeSaler @VAT, @email, @password, @name, @typeOfBusinessId, @contactName, @contactEmail, @contactMobile, @address, @city, @zipCode, @province, @country, @createdOn, @visible',
@@ -231,7 +231,7 @@ module.exports = function () {
         { name: 'city', value: req.body.city },
         { name: 'zipCode', value: req.body.zipCode },
         { name: 'province', value: req.body.province },
-        { name: 'country', value: req.body.country },
+        { name: 'country', value: req.body.country || '' },
         { name: 'createdOn', value: new Date() },
         { name: 'visible', value: true }
       ]
@@ -338,7 +338,7 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'city', 'value': req.body.city }, res)) return;
     if (!utils.validateParam({ 'name': 'zipCode', 'value': req.body.zipCode }, res)) return;
     if (!utils.validateParam({ 'name': 'province', 'value': req.body.province }, res)) return;
-    if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
+    // if (!utils.validateParam({ 'name': 'country', 'value': req.body.country }, res)) return;
 
 
     var query = {
@@ -357,7 +357,7 @@ module.exports = function () {
         { name: 'city', value: req.body.city },
         { name: 'zipCode', value: req.body.zipCode },
         { name: 'province', value: req.body.province },
-        { name: 'country', value: req.body.country },
+        { name: 'country', value: req.body.country || '' },
         { name: 'visible', value: req.body.visible == 1 ? true : false }
       ]
     };

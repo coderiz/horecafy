@@ -4,10 +4,12 @@ var constants = require('./constants');
 var async = require('async');
 var multer = require('multer');
 var path = require('path');
+var moment = require('moment');
 
 module.exports = function () {
 
   var router = express.Router();
+  moment.locale('es');
 
   // Get demands
   router.get('/:typeUser(wholesaler|customer)/:id', function (req, res, next) {
@@ -27,8 +29,36 @@ module.exports = function () {
             res.status(200).json(data);
           } else {
             let dataFromDB = JSON.parse(results[0]["notifications"]);
-            const data = utils.buildResponse(results.length, null, null, '', '', dataFromDB);
-            res.status(200).json(data);
+            console.log(results);
+
+            var response = new Array();
+            if (dataFromDB !== null && dataFromDB !== undefined && dataFromDB.length > 0) {
+              dataFromDB.forEach(obj => {
+                if (obj.images === undefined) {
+                  obj.images = "";
+                }
+
+                if (obj.video === undefined) {
+                  obj.video = "";
+                }
+
+                if (obj.timeslot === undefined) {
+                  obj.timeslot = "";
+                }
+
+                if (obj.visitDate === undefined) {
+                  obj.visitDate = "";
+                }
+
+                response.push(obj);
+              });
+
+              const data = utils.buildResponse(response.length, null, null, '', '', response);
+              res.status(200).json(data);
+            } else {
+              const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
+              res.status(200).json(data);
+            }
           }
         } else {
           const data = utils.buildResponse(0, null, null, constants.messages.DATA_NOT_FOUND, 'Data not found', []);
@@ -290,7 +320,7 @@ module.exports = function () {
 
             var subject = "Visita comercial confirmada";
             var body = `<p>Hola,</p> 
-                        <p>El distribuidor ${wholesaler.name} ha confirmado la reunión para el día ${businessVisit.timeslot}  sobre: "${businessVisit.comments}".</p>
+                        <p>El distribuidor ${wholesaler.name} ha confirmado la reunión para el día ${moment(businessVisit.visitDate).format('MMM Do YYYY')} ${businessVisit.timeslot}  sobre: "${businessVisit.comments}".</p>
                         <p>Sus datos de contacto son: contacto: ${wholesaler.contactName}, Teléfono:${wholesaler.contactMobile}.</p>`;
 
             var attachment = [];

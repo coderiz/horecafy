@@ -7,7 +7,7 @@ module.exports = {
         server: 'demo.aipxperts.com', // horecafy.database.windows.net
         database: 'horecafy_db',
         user: 'root',
-        password: 'root'
+        password: 'aipX@1234'
     },
     logging: {
         level: 'verbose'
