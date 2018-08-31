@@ -270,11 +270,10 @@ module.exports = function () {
 
               // create another email 
               subject = 'Horecafy - Registro de distribuidor';
-              body = `Hola, gracias por regístrate. Ahora crea tus listas con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p>
-
-                                                    <p>Si tienes que incorporar muchas familias a tus listas ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo una a una en la app.</p> 
-                                                    
-                                                    <p>Gracias por usar Horecafy</p>`;
+              body = `<p>Hola, gracias por registrarte.</p> 
+                      <p>Ahora crea tu catálogo con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p> 
+                      <p>Si tienes que incorporar muchas familias a tu catálogo  ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo manualmente en la app</p>
+                      <p>Gracias por usar Horecafy</p>`;
 
               utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
                 var jsonEmailResponse = JSON.parse(emailReponse);
@@ -402,10 +401,10 @@ module.exports = function () {
             const data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
             res.status(200).json(data);
           } else {
-            
-            var response = Array();
-            results.forEach(result => {
-              response.push(result[0]);
+
+            var response = {};
+            results[0].forEach(result => {
+              response[result.type] = result.totalCount;
             });
 
             const data = utils.buildResponse(response.length, null, null, '', '', response);
@@ -417,8 +416,7 @@ module.exports = function () {
         }
       })
       .catch(function (err) {
-        // can be emtpy
-        const data = utils.buildResponse(0, null, null, '', '', []);
+        const data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
       });
   });

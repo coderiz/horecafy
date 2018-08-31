@@ -62,7 +62,7 @@ module.exports = function () {
                                         var subject = 'Recuperar contraseña Horecafy';
                                         var body = `Hola ${customer.name}, 
                                         
-                                                    <p>por favor use este código para restaurar su contraseña de Horecafy: ${resetToken}.</p> 
+                                                    <p>por favor use este código para restaurar su contraseña de Horecafy: ${resetToken}</p> 
                                                     
                                                     <p>Si lo has olvidado el mail que utilizas es: ${customer.email}</p> 
                                                     

@@ -547,9 +547,9 @@ module.exports = function () {
             res.status(200).json(data);
           } else {
 
-            var response = Array();
-            results.forEach(result => {
-              response.push(result[0]);
+            var response = {};
+            results[0].forEach(result => {
+              response[result.type] = result.totalCount;
             });
 
             const data = utils.buildResponse(response.length, null, null, '', '', response);

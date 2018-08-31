@@ -374,15 +374,14 @@ module.exports = function () {
             data = utils.buildResponse(0, null, null, results[0].errorCode, '', []);
             res.status(200).json(data);
           } else {
-            // console.log(results[1][0]);
-            let wholeSaler = results[1][0];
+            
             let customer = results[2][0];
             let fromName = constants.emailName;
             let fromEmail = constants.emailFrom;
-            let toEmail = wholeSaler.email;
-            let toName = wholeSaler.name;
-            let subject = 'Horecafy - Oferta creada por distribuidor';
-            let body = `<p>Hola, hemos enviado tu oferta al restaurador. Esperamos que pronto recibas una aceptación y alcancéis un acuerdo fuera de Horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p><p>Gracias por usar Horecafy</p>`;
+            let toEmail = customer.email;
+            let toName = customer.name;
+            let subject = 'Horecafy - Nueva oferta recibida';
+            let body = `<p>Hola, has recibido alguna oferta a las listas compartidas. Echa un vistazo en la app y si te gustan pulsa en contactar con el distribuidor para que podáis alcanzar un acuerdo fuera de horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p><p>Gracias por usar Horecafy</p>`;
             let attachment = [];
 
             let emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
@@ -397,31 +396,8 @@ module.exports = function () {
                 res.status(200).json(data);
                 return;
               }
-
-              // After sending the notification to wholesaler, it's time to do the same with customer
-              let fromName = constants.emailName;
-              let fromEmail = constants.emailFrom;
-              let toEmail = customer.email;
-              let toName = customer.name;
-              let subject = 'Horecafy - Nueva oferta recibida';
-              let body = `<p>Hola, has recibido alguna oferta a las listas compartidas. Echa un vistazo en la app y si te gustan pulsa en contactar con el distribuidor para que podáis alcanzar un acuerdo fuera de horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p><p>Gracias por usar Horecafy</p>`;
-              let attachment = [];
-
-              let emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
-              let emailFrom = [fromEmail, fromName];
-
-              utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {
-                var jsonEmailResponse = JSON.parse(emailReponse);
-                // console.log('emailReponse.code -> ', jsonEmailResponse.code);
-                if (jsonEmailResponse.code !== 'success') {
-                  console.log(`Error during email sending -> ${emailReponse}`);
-                  data = utils.buildResponse(0, null, null, constants.messages.SENDING_EMAIL_ERROR, jsonEmailResponse.message, []);
-                  res.status(200).json(data);
-                  return;
-                }
-                data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
-                res.status(200).json(data);
-              });
+              data = utils.buildResponse(results[0].length, null, null, '', '', results[0]);
+              res.status(200).json(data);
             });
           }
         } else {
