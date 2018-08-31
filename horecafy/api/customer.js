@@ -396,15 +396,17 @@ module.exports = function () {
     if (!utils.validateParam({ 'name': 'brand', 'value': req.body.brand }, res)) return;
     if (!utils.validateParam({ 'name': 'consumption', 'value': req.body.consumption }, res)) return;
     if (!utils.validateParam({ 'name': 'targetPrice', 'value': req.body.targetPrice }, res)) return;
+    if (!utils.validateParam({ 'name': 'allowCall', 'value': req.body.allowCall }, res)) return;
 
     var query = {
-      sql: 'CreateProductRequest @customerId, @productName, @brand, @consumption, @targetPrice, @createdOn',
+      sql: 'CreateProductRequest @customerId, @productName, @brand, @consumption, @targetPrice, @allowCall, @createdOn',
       parameters: [
         { name: 'customerId', value: req.body.customerId },
         { name: 'productName', value: req.body.productName },
         { name: 'brand', value: req.body.brand },
         { name: 'consumption', value: req.body.consumption },
         { name: 'targetPrice', value: req.body.targetPrice || 0 },
+        { name: 'allowCall', value: (req.body.allowCall == "yes") ? true : false },
         { name: 'createdOn', value: new Date() }
       ],
       multiple: true
@@ -431,7 +433,9 @@ module.exports = function () {
             <p>producto: ${product.productName}<br /> 
             marca: ${product.brand}<br />
             consumo aproximado: ${product.consumption}<br />
-            precio objetivo: ${product.targetPrice}.</p>`;
+            precio objetivo: ${product.targetPrice}<br />
+            Llamada telefonica: ${(product.allowCall == 1) ? 'si' : 'no'}.
+            </p>`;
 
             var attachment = [];
 
