@@ -406,7 +406,7 @@ module.exports = function () {
         { name: 'brand', value: req.body.brand },
         { name: 'consumption', value: req.body.consumption },
         { name: 'targetPrice', value: req.body.targetPrice || 0 },
-        { name: 'allowCall', value: (req.body.allowCall == "yes") ? true : false },
+        { name: 'allowCall', value: (req.body.allowCall.toLowerCase() == "yes") ? true : false },
         { name: 'createdOn', value: new Date() }
       ],
       multiple: true
@@ -428,7 +428,7 @@ module.exports = function () {
             var toEmail = "restauradores@horecafy.com";
             var toName = "Horecafy";
             var subject = "Búsqueda producto";
-            var body = `<p>Hola! El establecimiento ${customer.name} ${customer.hiddenId} con código postal ${customer.zipCode} en calle ${customer.address} ${customer.city} con email ${customer.email} y teléfono ${customer.contactMobile} necesita: necesita:</p> 
+            var body = `<p>Hola! El establecimiento ${customer.name} ${customer.hiddenId} con código postal ${customer.zipCode} en calle ${customer.address} ${customer.city} con email ${customer.email} y teléfono ${customer.contactMobile} necesita:</p> 
             
             <p>producto: ${product.productName}<br /> 
             marca: ${product.brand}<br />
@@ -436,6 +436,8 @@ module.exports = function () {
             precio objetivo: ${product.targetPrice}<br />
             Llamada telefonica: ${(product.allowCall == 1) ? 'si' : 'no'}.
             </p>`;
+
+            console.log(body);
 
             var attachment = [];
 

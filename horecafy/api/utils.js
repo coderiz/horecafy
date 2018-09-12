@@ -1,5 +1,18 @@
 var crypto = require('crypto');
-var multer = require('multer');
+var constants = require('./constants');
+
+const nodemailer = require('nodemailer');
+var sgTransport = require('nodemailer-sendgrid-transport');
+
+var options = {
+    auth: {
+        api_user: 'carlosoderiz@horecafy.com',
+        api_key: 'Carlos@1234'
+    }
+}
+
+var transporter = nodemailer.createTransport(sgTransport(options));
+
 // var fs = require('fs');
 // var path = require('path');
 var constants = require('./constants');
@@ -61,23 +74,54 @@ module.exports = {
         });
     },
     sendCCEmail: function (emailFrom, emailTo, emailCC, subject, body, attachment, callback) {
+        
+        for (var key in emailTo) {
+            var emailTo = key;
+        }
 
-        var client = new Mailin("https://api.sendinblue.com/v2.0", "5cVYhrRL2vUJtQbS");
-        data = {
+        for (var key in emailCC) {
+            var emailCC = key;
+        }
+
+        let mailOptions = {
+            from: emailFrom[0],
             to: emailTo,
             cc: emailCC,
-            from: emailFrom,
             subject: subject,
-            html: body,
-            attachment: attachment
-        }
-        // console.log('data -> ', data);
+            html: body
+        };
 
-        client.send_email(data).on('complete', function (response) {
-            // console.log(response);
-            callback(response);
+        console.log(mailOptions);
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, (error, info) => {
+            if(error) {
+                callback('{ "code": "failure", "message": "Email failed to send!.", "data": "{}" }');
+            }
+
+            callback('{ "code": "success", "message": "Email sent successfully.", "data": "{}" }');
+
+            // var client = new Mailin("https://api.sendinblue.com/v2.0", "5cVYhrRL2vUJtQbS");
+            // data = {
+            //     to: emailTo,
+            //     cc: emailCC,
+            //     from: emailFrom,
+            //     subject: subject,
+            //     html: body,
+            //     attachment: attachment
+            // }
+            // console.log('data -> ', data);
+
+            // client.send_email(data).on('complete', function (response) {
+            //     console.log(response);
+            //     // callback(response);
+            // });
+
+            // callback(info);
         });
-    },    
+
+        
+    },
     buildResponse: function(totalRows, page, rows, error, message, data) {
         return {
             totalRows,

@@ -272,7 +272,7 @@ module.exports = function () {
               subject = 'Horecafy - Registro de distribuidor';
               body = `<p>Hola, gracias por registrarte.</p> 
                       <p>Ahora crea tu catálogo con las familias de productos que comercializas para que podamos hacerte llegar las necesidades de los restauradores registrados.</p> 
-                      <p>Si tienes que incorporar muchas familias a tu catálogo  ponte en contacto con nosotros en distribuidores@horecafy.com y te ayudaremos a subir tu catálogo en un excel en lugar de hacerlo manualmente en la app</p>
+                      <p>Si tienes alguna duda al crear tu catálogo ponte en contacto con nosotros en distribuidores@horecafy.com</p>
                       <p>Gracias por usar Horecafy</p>`;
 
               utils.sendEmail(emailFrom, emailTo, subject, body, attachment, function (emailReponse) {

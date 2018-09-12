@@ -113,6 +113,10 @@ module.exports = function () {
                   obj.video = "";
                 }
 
+                if (obj.approvedByCustomer === undefined) {
+                  obj.approvedByCustomer = "";
+                }
+
                 response.push(obj);
               });
 
@@ -135,7 +139,7 @@ module.exports = function () {
       });
   });
 
-  // Accept offer
+  // Contact offer
   router.post('/contact', function (req, res, next) {
 
     var query = {
@@ -240,12 +244,22 @@ module.exports = function () {
             // console.log(results[1][0]);
             let wholeSaler = results[1][0];
             let customer = results[2][0];
+            let offer = results[3][0];
+            
             let fromName = constants.emailName;
             let fromEmail = constants.emailFrom;
             let toEmail = wholeSaler.email;
             let toName = wholeSaler.name;
             let subject = 'Horecafy - Nueva oferta aceptada';
-            let body = `<p>Hola, el restaurador ${customer.name} ubicado en ${customer.address} ${customer.zipCode} ${customer.city} (${customer.province}) ha aceptado tu propuesta. Ponte en contacto con ${customer.contactName} en el teléfono ${customer.contactMobile} e intenta cerrar el acuerdo fuera de Horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p><p>Gracias por usar Horecafy</p>`;
+            let body = `<p>Hola, el restaurador ${customer.name} ubicado en ${customer.address} ${customer.zipCode} ${customer.city} (${customer.province}) ha aceptado tu propuesta. Ponte en contacto con ${customer.contactName} en el teléfono ${customer.contactMobile} e intenta cerrar el acuerdo fuera de Horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p>
+                        <p>Detalles de la oferta aceptada: <br />
+                        Familia: ${offer.familyName}<br />
+                        Marca: ${offer.brand}<br />
+                        Precio: ${offer.offerPrice}<br />
+                        Formato: ${offer.fomat}<br />
+                        Commentos: ${offer.comments}</p>
+                        <p>Gracias por usar Horecafy</p>`;
+
             let attachment = [];
 
             let emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
@@ -267,7 +281,14 @@ module.exports = function () {
               let toEmail = customer.email;
               let toName = customer.name;
               let subject = 'Horecafy - Oferta aceptada por restaurador';
-              let body = `<p>Hola, has aceptado una oferta del distribuidor realizada por ${wholeSaler.name}. Ponte en contacto con ${wholeSaler.contactName} en el teléfono ${wholeSaler.contactMobile} e intentar llegar a un acuerdo fuera de horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p><p>Gracias por usar Horecafy</p>`;
+              let body = `<p>Hola, has aceptado una oferta del distribuidor realizada por ${wholeSaler.name}. Ponte en contacto con ${wholeSaler.contactName} en el teléfono ${wholeSaler.contactMobile} e intentar llegar a un acuerdo fuera de horecafy; no cobramos nada por los acuerdos a los que lleguéis.</p>
+                          <p>Detalles de la oferta aceptada: <br />
+                          Marca: ${offer.brand}<br />
+                          Precio: ${offer.offerPrice}<br />
+                          Formato: ${offer.fomat}<br />
+                          Commentos: ${offer.comments}</p>
+                          <p>Gracias por usar Horecafy</p>`;
+
               let attachment = [];
 
               let emailTo = JSON.parse('{"' + toEmail + '":"' + toName + '"}');
@@ -293,6 +314,7 @@ module.exports = function () {
         }
       })
       .catch(function (err) {
+        console.log(err);
         data = utils.buildResponse(0, null, null, constants.messages.ERROR, err, []);
         res.status(200).json(data);
       });
